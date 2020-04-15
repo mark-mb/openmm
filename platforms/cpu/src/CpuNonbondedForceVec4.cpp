@@ -425,11 +425,17 @@ fvec4 CpuNonbondedForceVec4::ewaldScaleFunction(const fvec4& x) {
     ivec4 index = min(floor(x1), NUM_TABLE_POINTS);
     fvec4 coeff2 = x1-index;
     fvec4 coeff1 = 1.0f-coeff2;
-    fvec4 t1(&ewaldScaleTable[index[0]]);
+
+    fvec4 t1, t2;
+    load2x4_and_transpose(&ewaldScaleTable[index[0]], &ewaldScaleTable[index[1]],
+                        &ewaldScaleTable[index[2]], &ewaldScaleTable[index[3]],
+                        t1, t2);
+
+    /*fvec4 t1(&ewaldScaleTable[index[0]]);
     fvec4 t2(&ewaldScaleTable[index[1]]);
     fvec4 t3(&ewaldScaleTable[index[2]]);
     fvec4 t4(&ewaldScaleTable[index[3]]);
-    transpose(t1, t2, t3, t4);
+    transpose(t1, t2, t3, t4);*/
     return coeff1*t1 + coeff2*t2;
 }
 
@@ -438,11 +444,17 @@ fvec4 CpuNonbondedForceVec4::exptermsApprox(const fvec4& r) {
     ivec4 index = min(floor(r1), NUM_TABLE_POINTS);
     fvec4 coeff2 = r1-index;
     fvec4 coeff1 = 1.0f-coeff2;
-    fvec4 t1(&exptermsTable[index[0]]);
+
+    fvec4 t1, t2;
+    load2x4_and_transpose(&exptermsTable[index[0]], &exptermsTable[index[1]],
+                        &exptermsTable[index[2]], &exptermsTable[index[3]],
+                        t1, t2);
+
+    /*fvec4 t1(&exptermsTable[index[0]]);
     fvec4 t2(&exptermsTable[index[1]]);
     fvec4 t3(&exptermsTable[index[2]]);
     fvec4 t4(&exptermsTable[index[3]]);
-    transpose(t1, t2, t3, t4);
+    transpose(t1, t2, t3, t4);*/
     return coeff1*t1 + coeff2*t2;
 }
 

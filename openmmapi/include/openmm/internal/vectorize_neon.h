@@ -314,6 +314,25 @@ static inline void transpose(fvec4& v1, fvec4& v2, fvec4& v3, fvec4& v4) {
     v4 = t4.val[1];
 }
 
+static inline void load2x4_and_transpose(float *addr1, float *addr2, float *addr3, float *addr4,
+                                            fvec4& v1, fvec4& v2)
+{
+    float32x2_t t1, t2, t3, t4;
+    t1 = vld1_f32(addr1);
+    t2 = vld1_f32(addr2);
+    t3 = vld1_f32(addr3);
+    t4 = vld1_f32(addr4);
+
+    // Transpose
+    float32x2x2_t t5 = vuzp_f32(t1, t3);
+    float32x2x2_t t6 = vuzp_f32(t2, t4);
+    float32x2x2_t t7 = vtrn_f32(t5.val[0], t6.val[0]);
+    float32x2x2_t t8 = vtrn_f32(t5.val[1], t6.val[1]);
+
+    v1 = vcombine_f32(t7.val[0], t7.val[1]);
+    v2 = vcombine_f32(t8.val[0], t8.val[2]);
+}
+
 // Functions that operate on ivec4s.
 
 static inline ivec4 min(const ivec4& v1, const ivec4& v2) {
