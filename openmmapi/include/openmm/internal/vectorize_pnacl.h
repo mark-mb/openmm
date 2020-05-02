@@ -285,7 +285,7 @@ static inline float dot4(const fvec4& v1, const fvec4& v2) {
     return temp[0]+temp[1];
 }
 
-static inline float reduceAdd(const fvec4 v) {
+static inline float reduceAdd(const fvec4& v) {
     return dot4(v, fvec4(1.0f));
 }
 
@@ -317,7 +317,7 @@ static inline void transpose(const fvec4 in[4], fvec4& v0, fvec4& v1, fvec4& v2,
 /**
  * Out-of-place transpose from named variables into an array.
  */
-static inline void transpose(const fvec4 v0, const fvec4 v1, const fvec4 v2, const fvec4 v3, fvec4 out[4]) {
+static inline void transpose(const fvec4& v0, const fvec4& v1, const fvec4& v2, const fvec4& v3, fvec4 out[4]) {
     out[0] = v0; out[1] = v1; out[2] = v2; out[3] = v3;
     transpose(out[0], out[1], out[2], out[3]);
 }
@@ -365,7 +365,7 @@ static inline fvec4 blend(const fvec4& v1, const fvec4& v2, const __m128i& mask)
     return (__m128) ((mask&(__m128i)v2) + ((ivec4(0xFFFFFFFF)-ivec4(mask))&(__m128i)v1));
 }
 
-static inline fvec4 blendZero(const fvec4 v, const ivec4 mask) {
+static inline fvec4 blendZero(const fvec4& v, const ivec4& mask) {
     return blend(0.0f, v, mask);
 }
 
@@ -420,7 +420,7 @@ static inline fvec4 sqrt(const fvec4& v) {
  * of vectors. The first result vector contains the values at the given indexes, and the second
  * result vector contains the values from each respective index+1.
  */
-static inline void gatherVecPair(const float* table, const ivec4 index, fvec4& out0, fvec4& out1) {
+static inline void gatherVecPair(const float* table, const ivec4& index, fvec4& out0, fvec4& out1) {
     fvec4 t0(table + index[0]);
     fvec4 t1(table + index[1]);
     fvec4 t2(table + index[2]);
@@ -443,7 +443,7 @@ static inline void gatherVecPair(const float* table, const ivec4 index, fvec4& o
  *   output[2] = (Z0 + Z1 + Z2 + Z3)
  *   output[3] = undefined
  */
-static inline fvec4 reduceToVec3(const fvec4 x, const fvec4 y, const fvec4 z) {
+static inline fvec4 reduceToVec3(const fvec4& x, const fvec4& y, const fvec4& z) {
     const auto nx = reduceAdd(x);
     const auto ny = reduceAdd(y);
     const auto nz = reduceAdd(z);

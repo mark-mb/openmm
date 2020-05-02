@@ -239,7 +239,7 @@ static inline float dot8(const fvec8& v1, const fvec8& v2) {
     return _mm_cvtss_f32(result.lowerVec())+_mm_cvtss_f32(result.upperVec());
 }
 
-static inline float reduceAdd(const fvec8 v) {
+static inline float reduceAdd(const fvec8& v) {
     // :TODO: There are more efficient ways to do this.
     return dot8(v, fvec8(1.0f));
 }
@@ -324,7 +324,7 @@ static inline fvec8 blend(const fvec8& v1, const fvec8& v2, const fvec8& mask) {
     return fvec8(_mm256_blendv_ps(v1.val, v2.val, mask.val));
 }
 
-static inline fvec8 blendZero(const fvec8 v, const fvec8 mask) {
+static inline fvec8 blendZero(const fvec8& v, const fvec8& mask) {
     return blend(0.0f, v, mask);
 }
 
@@ -333,7 +333,7 @@ static inline fvec8 blendZero(const fvec8 v, const fvec8 mask) {
  * of vectors. The first result vector contains the values at the given indexes, and the second
  * result vector contains the values from each respective index+1.
  */
-static inline void gatherVecPair(const float* table, const ivec8 index, fvec8& out0, fvec8& out1) {
+static inline void gatherVecPair(const float* table, const ivec8& index, fvec8& out0, fvec8& out1) {
 
     // Gather all the separate memory data together. Each vector will have two values
     // which get used, and two which are ultimately discarded.
@@ -365,7 +365,7 @@ static inline void gatherVecPair(const float* table, const ivec8 index, fvec8& o
  *   output[2] = (Z0 + Z1 + Z2 + ...)
  *   output[3] = undefined
  */
-static inline fvec4 reduceToVec3(const fvec8 x, const fvec8 y, const fvec8 z) {
+static inline fvec4 reduceToVec3(const fvec8& x, const fvec8& y, const fvec8& z) {
     // The general strategy for a vector reduce-add operation is to take values from
     // different parts of the vector and overlap them a different part of the vector and then
     // add together. Repeat this several times until all values have been summed. Initially 8
