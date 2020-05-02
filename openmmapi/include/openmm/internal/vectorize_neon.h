@@ -427,7 +427,7 @@ static inline fvec4 blend(const fvec4& v1, const fvec4& v2, const ivec4& mask) {
 }
 
 static inline fvec4 blendZero(const fvec4& v, const ivec4& mask) {
-    return blend(0.0f, v, mask);
+    return vreinterpretq_f32_s32(vandq_s32(vreinterpretq_s32_f32(v), mask));
 }
 
 static inline ivec4 blendZero(const ivec4& v, const ivec4& mask) {
