@@ -375,6 +375,10 @@ static inline fvec4 blendZero(const fvec4& v, const ivec4& mask) {
     return blend(0.0f, v, mask);
 }
 
+static inline ivec4 blendZero(const ivec4& v, const ivec4& mask) {
+    return v & mask;
+}
+
 // These are at the end since they involve other functions defined above.
 
 static inline fvec4 min(const fvec4& v1, const fvec4& v2) {
