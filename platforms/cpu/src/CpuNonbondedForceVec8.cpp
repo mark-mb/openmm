@@ -25,31 +25,18 @@
 #include "CpuNonbondedForceFvec.h"
 #include "openmm/OpenMMException.h"
 
-#ifdef __AVX__
-
 #include "openmm/internal/vectorize8.h"
 
-bool isVec8Supported() {
-    // Make sure the CPU supports AVX.
-    int cpuInfo[4];
-    cpuid(cpuInfo, 0);
-    if (cpuInfo[0] >= 1) {
-        cpuid(cpuInfo, 1);
-        return ((cpuInfo[2] & ((int) 1 << 28)) != 0);
-    }
-    return false;
-}
+#ifdef VEC8_SUPPORTED
 
 OpenMM::CpuNonbondedForce* createCpuNonbondedForceVec8() {
     return new OpenMM::CpuNonbondedForceFvec<fvec8>();
 }
 
 #else
-bool isVec8Supported() {
-    return false;
-}
 
 OpenMM::CpuNonbondedForce* createCpuNonbondedForceVec8() {
    throw OpenMM::OpenMMException("Internal error: OpenMM was compiled without AVX support");
 }
+
 #endif

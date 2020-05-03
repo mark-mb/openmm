@@ -37,30 +37,10 @@
 #include "openmm/internal/vectorize8.h"
 #include <iostream>
 
-
-#ifndef __AVX__
-bool isVec8Supported() {
-    return false;
-}
-#else
-/**
- * Check whether 8 component vectors are supported with the current CPU.
- */
-bool isVec8Supported() {
-    // Make sure the CPU supports AVX.
-
-    int cpuInfo[4];
-    cpuid(cpuInfo, 0);
-    if (cpuInfo[0] >= 1) {
-        cpuid(cpuInfo, 1);
-        return ((cpuInfo[2] & ((int) 1 << 28)) != 0);
-    }
-    return false;
-}
-#endif
-
 using namespace OpenMM;
 using namespace std;
+
+#ifdef VEC8_SUPPORTED
 
 #define ASSERT_VEC4_EQUAL(found, expected0, expected1, expected2, expected3) {if (std::abs((found)[0]-(expected0))>1e-6 || std::abs((found)[1]-(expected1))>1e-6 || std::abs((found)[2]-(expected2))>1e-6 || std::abs((found)[3]-(expected3))>1e-6) {std::stringstream details; details << " Expected ("<<(expected0)<<","<<(expected1)<<","<<(expected2)<<","<<(expected3)<<"), found ("<<(found)[0]<<","<<(found)[1]<<","<<(found)[2]<<","<<(found)[3]<<")"; throwException(__FILE__, __LINE__, details.str());}};
 #define ASSERT_VEC8_EQUAL(found, expected0, expected1, expected2, expected3, expected4, expected5, expected6, expected7) {if (std::abs((found).lowerVec()[0]-(expected0))>1e-6 || std::abs((found).lowerVec()[1]-(expected1))>1e-6 || std::abs((found).lowerVec()[2]-(expected2))>1e-6 || std::abs((found).lowerVec()[3]-(expected3))>1e-6 || std::abs((found).upperVec()[0]-(expected4))>1e-6 || std::abs((found).upperVec()[1]-(expected5))>1e-6 || std::abs((found).upperVec()[2]-(expected6))>1e-6 || std::abs((found).upperVec()[3]-(expected7))>1e-6) {std::stringstream details; details << " Expected ("<<(expected0)<<","<<(expected1)<<","<<(expected2)<<","<<(expected3)<<","<<(expected4)<<","<<(expected5)<<","<<(expected6)<<","<<(expected7)<<"), found ("<<(found).lowerVec()[0]<<","<<(found).lowerVec()[1]<<","<<(found).lowerVec()[2]<<","<<(found).lowerVec()[3]<<","<<(found).upperVec()[0]<<","<<(found).upperVec()[1]<<","<<(found).upperVec()[2]<<","<<(found).upperVec()[3]<<")"; throwException(__FILE__, __LINE__, details.str());}};
@@ -303,3 +283,17 @@ int main(int argc, char* argv[]) {
     cout << "Done" << endl;
     return 0;
 }
+
+#else
+
+int main(int argc, char* argv[]) {
+    if (!isVec8Supported()) {
+        cout << "CPU is not supported.  Exiting." << endl;
+        return 0;
+    }
+    else {
+        cout << "Compilation error. Test built without vec8 support." << endl;
+        return 1;
+    }
+}
+#endif
