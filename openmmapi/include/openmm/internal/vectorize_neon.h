@@ -457,13 +457,13 @@ static inline fvec4 ceil(const fvec4& v) {
  * result vector contains the values from each respective index+1.
  */
 static inline void gatherVecPair(const float* table, const ivec4& index, fvec4& out0, fvec4& out1) {
-    fvec4 t0(table + index[0]);
-    fvec4 t1(table + index[1]);
-    fvec4 t2(table + index[2]);
-    fvec4 t3(table + index[3]);
-    transpose(t0, t1, t2, t3);
-    out0 = t0;
-    out1 = t1;
+    float32x2_t t0 = vld1_f32(table + index[0]);
+    float32x2_t t1 = vld1_f32(table + index[1]);
+    float32x2_t t2 = vld1_f32(table + index[2]);
+    float32x2_t t3 = vld1_f32(table + index[3]);
+
+    out0 = vcombine_f32(vuzp1_f32(t0, t1), vuzp1_f32(t2, t3));
+    out1 = vcombine_f32(vuzp2_f32(t0, t1), vuzp2_f32(t2, t3));
 }
 
 /**
