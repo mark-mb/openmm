@@ -35,6 +35,9 @@
 #if defined(__AVX__)
     #include "vectorize8_avx.h"
     #define VEC8_SUPPORTED
+#elif defined(__ARM64__)
+    #include "vectorize8_neon.h"
+    #define VEC8_SUPPORTED
 #else
 bool isVec8Supported() {
     return false;
