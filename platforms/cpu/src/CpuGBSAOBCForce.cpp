@@ -159,7 +159,7 @@ void CpuGBSAOBCForce::threadComputeForce(ThreadPool& threads, int threadIndex) {
         fvec4 y(atomy);
         fvec4 z(atomz);
         ivec4 mask(blockMask);
-        float sum[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+        fvec4 sum(0.0f);
         for (int atomJ = 0; atomJ < numParticles; atomJ++) {
             fvec4 posJ(posq+4*atomJ);
             fvec4 dx, dy, dz, r2;
@@ -182,25 +182,24 @@ void CpuGBSAOBCForce::threadComputeForce(ThreadPool& threads, int threadIndex) {
             fvec4 r2Inverse = rInverse*rInverse;
             fvec4 logRatio = fastLog(u_ij/l_ij);
             fvec4 term = l_ij - u_ij + 0.25f*r*(u_ij2 - l_ij2) + (0.5f*rInverse*logRatio) + (0.25f*scaledRadiusJ*scaledRadiusJ*rInverse)*(l_ij2 - u_ij2);
-            for (int j = 0; j < 4; j++) {
-                if (include[j]) {
-                    sum[j] += term[j];
-                    if (offsetRadiusI[j] < scaledRadiusJ-r[j])
-                        sum[j] += 2.0f*(radiusIInverse[j]-l_ij[j]);
-                }
-            }
+            sum += blendZero(term, include);
+            const auto offsetMask = include & (offsetRadiusI < (scaledRadiusJ - r));
+            sum += blendZero(2.0f * (radiusIInverse - l_ij), offsetMask);
         }
-        for (int i = 0; i < numInBlock; i++) {
-            int atomIndex = blockStart+i;
-            sum[i] *= 0.5f*atomRadius[i];
-            float sum2 = sum[i]*sum[i];
-            float sum3 = sum[i]*sum2;
-            float tanhSum = tanh(alphaObc*sum[i] - betaObc*sum2 + gammaObc*sum3);
-            float radiusI = atomRadius[i] + dielectricOffset;
-            bornRadii[atomIndex] = 1.0f/(1.0f/atomRadius[i] - tanhSum/radiusI);
-            obcChain[atomIndex] = atomRadius[i]*(alphaObc - 2.0f*betaObc*sum[i] + 3.0f*gammaObc*sum2);
-            obcChain[atomIndex] = (1.0f - tanhSum*tanhSum)*obcChain[atomIndex]/radiusI;
-        }
+
+        fvec4 radiusI = dielectricOffset + offsetRadiusI;
+        sum *= 0.5f * offsetRadiusI;
+        fvec4 sum2 = sum * sum;
+        fvec4 sum3 = sum * sum2;
+        fvec4 alphaBetaGammaSum = (alphaObc * sum) - (betaObc * sum2) + (gammaObc * sum3);
+        fvec4 tanhSum { tanh(alphaBetaGammaSum[0]), tanh(alphaBetaGammaSum[1]), tanh(alphaBetaGammaSum[2]), tanh(alphaBetaGammaSum[3]) };
+
+        fvec4 bornRadiiVec = 1.0f / (radiusIInverse - tanhSum / radiusI);
+        bornRadiiVec.store(&bornRadii[blockStart]);
+
+        fvec4 obcChainVec = offsetRadiusI * (alphaObc - (2.0f * betaObc * sum) + (3.0f * gammaObc * sum2));
+        obcChainVec = (1.0f - tanhSum * tanhSum) * obcChainVec / radiusI;
+        obcChainVec.store(&obcChain[blockStart]);
     }
     threads.syncThreads();
 
